@@ -2243,7 +2243,7 @@ int rtw_change_ifname(_adapter *padapter, const char *ifname)
 		unregister_netdev(cur_pnetdev);
 	else
 #endif
-		cfg80211_unregister_netdevice(cur_pnetdev);
+		unregister_netdevice(cur_pnetdev);
 
 	rereg_priv->old_pnetdev=cur_pnetdev;
 
@@ -2268,7 +2268,7 @@ int rtw_change_ifname(_adapter *padapter, const char *ifname)
 		ret = register_netdev(pnetdev);
 	else
 #endif
-		ret = cfg80211_register_netdevice(pnetdev);
+		ret = register_netdevice(pnetdev);
 
 	if ( ret != 0) {
 		RT_TRACE(_module_hci_intfs_c_,_drv_err_,("register_netdev() failed\n"));
