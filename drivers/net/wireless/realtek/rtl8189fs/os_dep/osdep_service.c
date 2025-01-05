@@ -2243,7 +2243,7 @@ int rtw_change_ifname(_adapter *padapter, const char *ifname)
 		unregister_netdev(cur_pnetdev);
 	else
 #endif
-		unregister_netdevice(cur_pnetdev);
+		cfg80211_register_netdevice(cur_pnetdev);
 
 	rereg_priv->old_pnetdev=cur_pnetdev;
 
