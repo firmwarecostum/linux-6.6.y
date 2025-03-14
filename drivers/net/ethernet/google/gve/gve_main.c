@@ -1753,6 +1753,8 @@ static void gve_turndown(struct gve_priv *priv)
 	/* Stop tx queues */
 	netif_tx_disable(priv->dev);
 
+	xdp_features_clear_redirect_target(priv->dev);
+
 	gve_clear_napi_enabled(priv);
 	gve_clear_report_stats(priv);
 
@@ -1792,6 +1794,9 @@ static void gve_turnup(struct gve_priv *priv)
 						       priv->rx_coalesce_usecs);
 		}
 	}
+
+	if (priv->num_xdp_queues && gve_supports_xdp_xmit(priv))
+		xdp_features_set_redirect_target(priv->dev, false);
 
 	gve_set_napi_enabled(priv);
 }
@@ -2009,14 +2014,17 @@ static void gve_service_task(struct work_struct *work)
 
 static void gve_set_netdev_xdp_features(struct gve_priv *priv)
 {
+	xdp_features_t xdp_features;
+
 	if (priv->queue_format == GVE_GQI_QPL_FORMAT) {
-		priv->dev->xdp_features = NETDEV_XDP_ACT_BASIC;
-		priv->dev->xdp_features |= NETDEV_XDP_ACT_REDIRECT;
-		priv->dev->xdp_features |= NETDEV_XDP_ACT_NDO_XMIT;
-		priv->dev->xdp_features |= NETDEV_XDP_ACT_XSK_ZEROCOPY;
+		xdp_features = NETDEV_XDP_ACT_BASIC;
+		xdp_features |= NETDEV_XDP_ACT_REDIRECT;
+		xdp_features |= NETDEV_XDP_ACT_XSK_ZEROCOPY;
 	} else {
-		priv->dev->xdp_features = 0;
+		xdp_features = 0;
 	}
+
+	xdp_set_features_flag(priv->dev, xdp_features);
 }
 
 static int gve_init_priv(struct gve_priv *priv, bool skip_describe_device)
